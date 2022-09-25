@@ -19,7 +19,7 @@ export default function App() {
     const [acertos, setAcertos] = useState(0)
     const [arraySemAcentos, setArraySemAcentos] = useState([])
     const [tentativa, setTentativa] = useState([])
-    const [input, setInput] = useState([])
+    const [input, setInput] = useState('')
     const [estadoInput, setEstadoInput] = useState(true)
     
       
@@ -67,11 +67,12 @@ export default function App() {
         }
 
         return (
-          <BotaoLetra
+          <BotaoLetra 
             onClick={() => ClickLetra(letraRecebida)}
             key={indiceRecebido}
             disabled={desativado}
             clicado={!desativado}
+            data-identifier="letter"            
           >
             {letraRecebida.toUpperCase()}
           </BotaoLetra>
@@ -107,21 +108,31 @@ export default function App() {
         let cor = "black"
         if (erros === 6){
             cor = "red"
+            setEstadoInput(true)
         } else if(acertos === arraySemAcentos.length){
             cor = "green"
+            setEstadoInput(true)
         }
         return(
-            <PalavraAtual corzinha={cor}>{(erros === 6)? stringPalavra.toUpperCase(): tentativa}</PalavraAtual>
+            <PalavraAtual data-identifier="word" corzinha={cor}>{(erros === 6)? stringPalavra.toUpperCase(): tentativa}</PalavraAtual>
         )
     }
 
     function Chute(){
-        if (input === stringPalavra){
+        if(input != ''){
             const maiusculo = stringPalavra.toUpperCase()
-            setTentativa(maiusculo)
-            setAcertos(stringPalavra.length)
+
+            if (input.toUpperCase() === maiusculo){
+                setTentativa(maiusculo)
+                setAcertos(stringPalavra.length)
+                setEstadoInput(true)
+            }else{
+                setErros(6)
+                setTentativa(maiusculo)
+                setEstadoInput(true)
+            }
+            setInput("")
         }
-        setInput("")
     }
     
 
@@ -148,9 +159,9 @@ export default function App() {
     <>
       <GlobalStyle />
       <Container>
-        <img src={ImagemForca()} alt="vazia" />
+        <img data-identifier="game-image" src={ImagemForca()} alt="vazia" />
         <div>
-          <EscolhaBotao onClick={EscolherPalavra}>
+          <EscolhaBotao data-identifier="choose-word" onClick={EscolherPalavra}>
             Escolher palavra
           </EscolhaBotao>
           <Monitor/>
@@ -161,8 +172,8 @@ export default function App() {
       </Teclado>
       <Palpite>
         Já sei a palavra!
-        <InputChute onChange={(e) => setInput(e.target.value)} value={input} type="text" disabled={estadoInput}/>
-        <BotaoChute onClick={Chute}>Chutar</BotaoChute>
+        <InputChute data-identifier="type-guess" onChange={(e) => setInput(e.target.value)} value={input} type="text" disabled={estadoInput}/>
+        <BotaoChute data-identifier="guess-button" onClick={Chute} disabled={estadoInput} desativado ={estadoInput}>Chutar</BotaoChute>
       </Palpite>
     </>
   );
@@ -208,9 +219,9 @@ const BotaoLetra = styled.button`
 `
 const BotaoChute = styled(BotaoLetra)`
     width: auto;
-    background-color: #E1ECF4;
-    color: #4D75A0;
-    cursor: pointer;
+    cursor: ${props => props.desativado ? "not-allowed" : "pointer"};
+    background-color: ${props => props.desativado ? "#9FAAB5" : "#E1ECF4"};
+    color: ${props => props.desativado ? "#79818A": "#4D75A0"};
 `
 
 const Teclado = styled.div`
