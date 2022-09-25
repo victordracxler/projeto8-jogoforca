@@ -19,9 +19,10 @@ export default function App() {
     const [acertos, setAcertos] = useState(0)
     const [arraySemAcentos, setArraySemAcentos] = useState([])
     const [tentativa, setTentativa] = useState([])
+    const [input, setInput] = useState([])
+    const [estadoInput, setEstadoInput] = useState(true)
     
-    console.log(arrayPalavra)
-    console.log(acertos)
+      
 
     function EscolherPalavra(){
         const random = Math.floor(Math.random() * palavras.length);
@@ -48,19 +49,33 @@ export default function App() {
         setClicadas([])
         setAcertos(0)
         setErros(0)
+        setInput("")
+        setEstadoInput(false)
     }
 
     function RenderLetras(letraRecebida, indiceRecebido){
         let desativado = true
-        if (clicadas.includes(letraRecebida) || arrayPalavra.length === 0 || erros === 6){
-            desativado = true
-        }else{
-            desativado = false
+        if (
+          clicadas.includes(letraRecebida) ||
+          arrayPalavra.length === 0 ||
+          erros === 6 ||
+          acertos === arraySemAcentos.length
+        ) {
+          desativado = true;
+        } else {
+          desativado = false;
         }
 
-        return(
-            <BotaoLetra onClick={() => ClickLetra(letraRecebida)} key={indiceRecebido} disabled={desativado} clicado={!desativado}>{letraRecebida.toUpperCase()}</BotaoLetra>
-        )
+        return (
+          <BotaoLetra
+            onClick={() => ClickLetra(letraRecebida)}
+            key={indiceRecebido}
+            disabled={desativado}
+            clicado={!desativado}
+          >
+            {letraRecebida.toUpperCase()}
+          </BotaoLetra>
+        );
     }
 
     function ClickLetra(letraClicada){
@@ -77,10 +92,8 @@ export default function App() {
                     indices.push(i)
                 }
             }
-            indices.forEach((indice) => atualizado[indice] = letraClicada)
-            // for (let i = 0; i < indices.length; i++){
-            //     atualizado[indice]
-            // }
+            indices.forEach((indice) => atualizado[indice] = arrayPalavra[indice].toUpperCase())
+         
             setTentativa(atualizado)
             setAcertos(acertos + repeticoes)
         } else{
@@ -98,8 +111,17 @@ export default function App() {
             cor = "green"
         }
         return(
-            <PalavraAtual corzinha={cor}>{(erros === 6)? stringPalavra: tentativa}</PalavraAtual>
+            <PalavraAtual corzinha={cor}>{(erros === 6)? stringPalavra.toUpperCase(): tentativa}</PalavraAtual>
         )
+    }
+
+    function Chute(){
+        if (input === stringPalavra){
+            const maiusculo = stringPalavra.toUpperCase()
+            setTentativa(maiusculo)
+            setAcertos(stringPalavra.length)
+        }
+        setInput("")
     }
     
 
@@ -139,8 +161,8 @@ export default function App() {
       </Teclado>
       <Palpite>
         Já sei a palavra!
-        <input type="text" />
-        <BotaoChute>Chutar</BotaoChute>
+        <InputChute onChange={(e) => setInput(e.target.value)} value={input} type="text" disabled={estadoInput}/>
+        <BotaoChute onClick={Chute}>Chutar</BotaoChute>
       </Palpite>
     </>
   );
@@ -155,6 +177,8 @@ const Container = styled.div`
         flex-direction: column;
         justify-content: space-between;
         margin: 0 auto;
+        padding: 50px 0;
+        align-items: flex-end;
     }
 
 `
@@ -168,8 +192,6 @@ const EscolhaBotao = styled.button`
     color: #ffffff;
     border-radius: 10px;
     cursor: pointer;
-
-
     `
 
 const BotaoLetra = styled.button`
@@ -200,10 +222,19 @@ const Teclado = styled.div`
 const Palpite = styled.div`
     width: 650px;
     margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 const PalavraAtual = styled.div`
     font-size: 50px;
     font-weight: 700;
     letter-spacing: 5px;
     color: ${props => props.corzinha};
+`
+
+const InputChute = styled.input`
+    height: 40px;
+    border-radius: 5px;
+    margin: 0 15px;
 `
