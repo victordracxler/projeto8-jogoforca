@@ -2,12 +2,27 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GlobalStyle from "./globalStyles";
 import forca0 from "./imgs/forca0.png";
+import palavras from "./palavras";
 
 export default function App() {
     const alfabeto = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
     const [clicadas, setClicadas] = useState([])
+    const [arrayPalavra, setArrayPalavra] = useState([])
+    
+    console.log(arrayPalavra)
 
-    console.log(clicadas)
+    function EscolherPalavra(){
+        const random = Math.floor(Math.random() * palavras.length);
+        const palavraSorteada = palavras[random]
+        console.log(palavraSorteada);
+        
+        const novoArrayPalavra = []
+        for (let i = 0; i < palavraSorteada.length; i++){
+            novoArrayPalavra.push(palavraSorteada[i])
+        }
+        setArrayPalavra(novoArrayPalavra)
+        setClicadas([])
+    }
 
     function RenderLetras(letraRecebida, indiceRecebido){
         let booleano = true
@@ -34,7 +49,7 @@ export default function App() {
     <Container>
       <img src={forca0} alt="vazia" />
       <div>
-      <EscolhaBotao>Escolher palavra</EscolhaBotao>
+      <EscolhaBotao onClick={EscolherPalavra}>Escolher palavra</EscolhaBotao>
       <div className="palavra">_____</div>
       </div>
       </Container>
