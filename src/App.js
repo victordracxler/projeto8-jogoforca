@@ -18,33 +18,30 @@ export default function App() {
     const [erros, setErros] = useState(0)
     const [acertos, setAcertos] = useState(0)
     const [arraySemAcentos, setArraySemAcentos] = useState([])
+    const [strSemAcentos, setStrSemAcentos] = useState("")
     const [tentativa, setTentativa] = useState([])
     const [input, setInput] = useState('')
     const [estadoInput, setEstadoInput] = useState(true)
-    
-      
 
+   
     function EscolherPalavra(){
         const random = Math.floor(Math.random() * palavras.length);
         const palavraSorteada = palavras[random]
-        console.log(palavraSorteada);
-        
-
         const novoArrayPalavra = []
         const underlines = []
         const novoArraySemAcentos = []
-        const result = palavraSorteada.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+        const novoStrSemAcentos = palavraSorteada.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
         for (let i = 0; i < palavraSorteada.length; i++){
             novoArrayPalavra.push(palavraSorteada[i])
-            novoArraySemAcentos.push(result[i])
+            novoArraySemAcentos.push(novoStrSemAcentos[i])
             underlines.push('_')
-        }
-                  
+        }         
 
         setStringPalavra(palavraSorteada)
         setArrayPalavra(novoArrayPalavra)
         setArraySemAcentos(novoArraySemAcentos)
+        setStrSemAcentos(novoStrSemAcentos)
         setTentativa(underlines)
         setClicadas([])
         setAcertos(0)
@@ -100,8 +97,6 @@ export default function App() {
         } else{
             setErros(erros +1)
         }
-
-        
     }
 
     function Monitor(){
@@ -121,15 +116,17 @@ export default function App() {
     function Chute(){
         if(input != ''){
             const maiusculo = stringPalavra.toUpperCase()
+            const semAccMaiusc = strSemAcentos.toUpperCase()
+            setTentativa(maiusculo)
+            setEstadoInput(true)
 
-            if (input.toUpperCase() === maiusculo){
-                setTentativa(maiusculo)
-                setAcertos(stringPalavra.length)
-                setEstadoInput(true)
+            if (
+            input.toUpperCase() === maiusculo || 
+            input.toUpperCase() === semAccMaiusc
+            ){                
+                setAcertos(stringPalavra.length)                
             }else{
-                setErros(6)
-                setTentativa(maiusculo)
-                setEstadoInput(true)
+                setErros(6)               
             }
             setInput("")
         }
@@ -182,6 +179,9 @@ export default function App() {
 
 const Container = styled.div`
     display: flex;
+    max-width:1200px;
+    margin: 20px auto;
+    justify-content: space-around;    
 
     div{
         display:flex;
@@ -203,7 +203,7 @@ const EscolhaBotao = styled.button`
     color: #ffffff;
     border-radius: 10px;
     cursor: pointer;
-    `
+`
 
 const BotaoLetra = styled.button`
     height: 40px;
@@ -215,7 +215,6 @@ const BotaoLetra = styled.button`
     color: ${props => props.clicado ? "#4D75A0":"#79818A"};
     margin: 5px 5px;
     cursor: ${props => props.clicado ? "pointer" : "not-allowed"};
-
 `
 const BotaoChute = styled(BotaoLetra)`
     width: auto;
@@ -226,8 +225,9 @@ const BotaoChute = styled(BotaoLetra)`
 
 const Teclado = styled.div`
     flex-wrap: wrap;
-    width: 650px;
+    max-width: 650px;
     margin: 0 auto;
+    justify-content: center;
 `
 
 const Palpite = styled.div`
