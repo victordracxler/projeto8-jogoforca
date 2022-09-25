@@ -14,70 +14,109 @@ export default function App() {
     const alfabeto = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
     const [clicadas, setClicadas] = useState([])
     const [arrayPalavra, setArrayPalavra] = useState([])
+    const [stringPalavra, setStringPalavra] = useState("")
     const [erros, setErros] = useState(0)
     const [acertos, setAcertos] = useState(0)
+    const [arraySemAcentos, setArraySemAcentos] = useState([])
+    const [tentativa, setTentativa] = useState([])
     
     console.log(arrayPalavra)
+    console.log(acertos)
 
     function EscolherPalavra(){
         const random = Math.floor(Math.random() * palavras.length);
         const palavraSorteada = palavras[random]
         console.log(palavraSorteada);
         
+
         const novoArrayPalavra = []
+        const underlines = []
+        const novoArraySemAcentos = []
+        const result = palavraSorteada.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+
         for (let i = 0; i < palavraSorteada.length; i++){
             novoArrayPalavra.push(palavraSorteada[i])
+            novoArraySemAcentos.push(result[i])
+            underlines.push('_')
         }
+                  
+
+        setStringPalavra(palavraSorteada)
         setArrayPalavra(novoArrayPalavra)
+        setArraySemAcentos(novoArraySemAcentos)
+        setTentativa(underlines)
         setClicadas([])
         setAcertos(0)
         setErros(0)
     }
 
     function RenderLetras(letraRecebida, indiceRecebido){
-        let booleano = true
-        if (clicadas.includes(letraRecebida)){
-            booleano = true
+        let desativado = true
+        if (clicadas.includes(letraRecebida) || arrayPalavra.length === 0 || erros === 6){
+            desativado = true
         }else{
-            booleano = false
+            desativado = false
         }
 
         return(
-            <BotaoLetra onClick={() => ClickLetra(letraRecebida)} key={indiceRecebido} disabled={booleano} clicado={!booleano}>{letraRecebida.toUpperCase()}</BotaoLetra>
+            <BotaoLetra onClick={() => ClickLetra(letraRecebida)} key={indiceRecebido} disabled={desativado} clicado={!desativado}>{letraRecebida.toUpperCase()}</BotaoLetra>
         )
     }
 
     function ClickLetra(letraClicada){
         const novoArray = [...clicadas, letraClicada]
         setClicadas(novoArray)
-        if(arrayPalavra.includes(letraClicada)){
-            setAcertos(acertos +1)
+        if(arraySemAcentos.includes(letraClicada)){
+            let repeticoes = 0
+            const indices = []
+            let atualizado = [...tentativa]
+
+            for (let i = 0; i<arraySemAcentos.length; i++){
+                if (letraClicada === arraySemAcentos[i]){
+                    repeticoes++
+                    indices.push(i)
+                }
+            }
+            indices.forEach((indice) => atualizado[indice] = letraClicada)
+            // for (let i = 0; i < indices.length; i++){
+            //     atualizado[indice]
+            // }
+            setTentativa(atualizado)
+            setAcertos(acertos + repeticoes)
         } else{
             setErros(erros +1)
         }
 
+        
     }
+
+    function Monitor(){
+        let cor = "black"
+        if (erros === 6){
+            cor = "red"
+        } else if(acertos === arraySemAcentos.length){
+            cor = "green"
+        }
+        return(
+            <PalavraAtual corzinha={cor}>{(erros === 6)? stringPalavra: tentativa}</PalavraAtual>
+        )
+    }
+    
 
     function ImagemForca(){
         switch(erros){
             case 6:
-                return forca6
-               
+                return forca6               
             case 5:
                 return forca5
-               
             case 4:
-                return forca4
-               
+                return forca4               
             case 3:
-                return forca3
-               
+                return forca3               
             case 2:
-                return forca2
-               
+                return forca2               
             case 1:
-                return forca1
-               
+                return forca1               
             default:
                 return forca0
         }
@@ -85,22 +124,24 @@ export default function App() {
 
   return (
     <>
-    <GlobalStyle/>
-    <Container>
-      <img src={ImagemForca()} alt="vazia" />
-      <div>
-      <EscolhaBotao onClick={EscolherPalavra}>Escolher palavra</EscolhaBotao>
-      <div className="palavra">_____</div>
-      </div>
+      <GlobalStyle />
+      <Container>
+        <img src={ImagemForca()} alt="vazia" />
+        <div>
+          <EscolhaBotao onClick={EscolherPalavra}>
+            Escolher palavra
+          </EscolhaBotao>
+          <Monitor/>
+        </div>
       </Container>
-      <div className="letras">
+      <Teclado>
         {alfabeto.map((letra, indiceLetra) => RenderLetras(letra, indiceLetra))}
-      </div>
-      <div className="palpite">
+      </Teclado>
+      <Palpite>
         Já sei a palavra!
         <input type="text" />
-        <button>Chutar</button>
-        </div>
+        <BotaoChute>Chutar</BotaoChute>
+      </Palpite>
     </>
   );
 }
@@ -142,4 +183,27 @@ const BotaoLetra = styled.button`
     margin: 5px 5px;
     cursor: ${props => props.clicado ? "pointer" : "not-allowed"};
 
+`
+const BotaoChute = styled(BotaoLetra)`
+    width: auto;
+    background-color: #E1ECF4;
+    color: #4D75A0;
+    cursor: pointer;
+`
+
+const Teclado = styled.div`
+    flex-wrap: wrap;
+    width: 650px;
+    margin: 0 auto;
+`
+
+const Palpite = styled.div`
+    width: 650px;
+    margin: 0 auto;
+`
+const PalavraAtual = styled.div`
+    font-size: 50px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: ${props => props.corzinha};
 `
